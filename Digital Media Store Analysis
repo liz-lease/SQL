@@ -1,0 +1,126 @@
+# Here I'm working with a dataset called chinook, which represents a digital media store and includes tables for artists, albums, media tracks, invoices, and customers.
+
+#Show the customers who are not in the US. 
+
+SELECT FirstName, LastName, CustomerId, Country
+FROM Customers
+WHERE Country != 'USA'
+ORDER BY Country;
+
+#Show only the customers from Brazil.
+
+SELECT FirstName, LastName, CustomerId, Country
+FROM Customers
+WHERE Country = 'Brazil';
+
+#Find the Invoices of customer from Brazil.
+
+SELECT FirstName, LastName, InvoiceID, InvoiceDate, BillingCountry
+FROM Customers
+LEFT JOIN invoices
+ON Customers.CustomerID = invoices.CustomerID
+WHERE Country = 'Brazil';
+
+# Find a unique list of billing countries from the invoice table.
+
+SELECT DISTINCT BillingCountry
+FROM invoices
+ORDER BY BillingCountry;
+
+--Which customers generated the highest revenue total?
+
+SELECT customers.CustomerId, LastName, FirstName, SUM(UnitPrice * Quantity) AS Total_Revenue
+FROM customers
+JOIN invoices
+ON customers.CustomerId = invoices.CustomerId
+JOIN invoice_items
+ON invoices.InvoiceId = invoice_items.InvoiceId
+GROUP BY customers.CustomerId, LastName, FirstName
+ORDER BY Total_Revenue desc;
+
+# Show the employees who are Sales Agents.
+
+SELECT * FROM employees
+WHERE Title LIKE 'Sales%Agent';
+
+# Provide a query that shows the invoices associated with each sales agent.
+
+SELECT InvoiceID, employees.LastName, employees.FirstName
+FROM invoices
+LEFT JOIN Customers
+ON Customers.CustomerID = invoices.CustomerID
+LEFT JOIN employees
+ON employees.EmployeeId = Customers.SupportRepId
+ORDER BY employees.LastName;
+
+# Show the invoice total, customer name, country and sales agent name for all invoices and customers.
+
+SELECT customers.LastName, customers.FirstName, Total, 
+customers.Country, employees.LastName AS SalesAgentLastName,
+employees.FirstName AS SalesAgentFirstName
+FROM invoices
+LEFT JOIN Customers
+ON Customers.CustomerID = invoices.CustomerID
+LEFT JOIN employees
+ON employees.EmployeeId = Customers.SupportRepId
+ORDER BY customers.LastName;
+
+# Which employees have the most customers assigned to them?
+
+SELECT COUNT(customers.LastName), employees.LastName AS SalesAgentLastName,
+employees.FirstName AS SalesAgentFirstName
+FROM invoices
+LEFT JOIN Customers
+ON Customers.CustomerID = invoices.CustomerID
+LEFT JOIN employees
+ON employees.EmployeeId = Customers.SupportRepId
+GROUP BY SalesAgentLastName;
+
+# How many invoices were there in 2009?
+
+SELECT COUNT(*)
+FROM invoices
+WHERE InvoiceDate BETWEEN '2009-01-01' AND '2009-12-31';
+
+# What are the total sales for 2009?
+
+SELECT SUM(Total)
+FROM invoices
+WHERE InvoiceDate BETWEEN '2009-01-01' AND '2009-12-31';
+
+# Write a query that includes the purchased track name with each invoice line ID.
+
+SELECT Name, InvoiceLineID
+FROM tracks
+INNER JOIN invoice_items
+ON tracks.TrackID = invoice_items.TrackID;
+
+# Write a query that inclues the purchased track name and artist name with each invoice line ID
+
+SELECT artists.Name AS ArtistName, tracks.Name AS TrackName, InvoiceLineID
+FROM invoice_items
+LEFT JOIN tracks
+ON tracks.TrackID = invoice_items.TrackID
+INNER JOIN albums
+ON albums.AlbumId= tracks.AlbumId
+LEFT JOIN artists
+ON artists.ArtistID = albums.ArtistId;
+
+# Write a query that shows all the tracks and includes the album name, media type, and genre.
+
+SELECT t.Name AS TrackName, a.Title AS AlbumName, 
+m.Name AS MediaType, g.Name AS Genre
+FROM tracks t
+JOIN albums a
+ON t.AlbumId = a.AlbumId
+JOIN media_types m
+ON m.MediaTypeID = t.MediaTypeID
+JOIN genres g
+ON g.GenreId = t.GenreId
+ORDER BY AlbumName;
+
+
+
+
+
+
